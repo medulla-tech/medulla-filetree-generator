@@ -12,11 +12,26 @@
 #include <vector>
 #include <set>
 #include <sstream>
-
 #include <algorithm>
 
+// les caracteres '/' et ':' sont interdits dans tous les os pour la composition du path des répertoires.
+// Ils sont donc utilisés pour reduire la taille du fichiers json à transferer.
+// ce program doit être dans le répertoire suivant : C:\\"Program Files"\Pulse\bin\pulse-filetree-generator.exe 
+// ouput "C:\\Program Files\\Pulse\\tmp\\treejson.json"
+
+// example C:\\"Program Files"\Pulse\bin\pulse-filetree-generator.exe "C:\\" "C:\\Program Files\Pulse\tmp\treejson.json"
+
 WIN32_FIND_DATA data;
-//using namespace std;
+
+
+template <typename T>
+void display(T &v, std::wstring text) {
+	typename T::iterator it;
+	std::wcout << text << std::endl;
+	for (it = v.begin(); it != v.end(); ++it) {
+		std::wcout << "\t" << *it << std::endl;
+	}
+}
 
 inline std::wstring wtrim_right_copy(
 	const std::wstring& s,
@@ -66,18 +81,21 @@ void listdir(const wchar_t dir[], FILE * fp, std::set<std::wstring> &parts) {
 	wcscpy_s(nom, dir);
 	wcscat_s(nom, L"\\*");
 	wchar_t espacea[5];
-	wcscpy_s(espacea, L" {");
+	wcscpy_s(espacea, L"");
+	std::set< std::wstring >::iterator it;
 	HANDLE h = FindFirstFile(nom, &data);
-	if (h == INVALID_HANDLE_VALUE) { fwprintf_s(stderr, L" Error %s", nom); return; }
+
+	if (h == INVALID_HANDLE_VALUE)
+	{
+		// fwprintf_s(stderr, L" Error %s", nom);
+		return;
+	}
 	h = FindFirstFile(nom, &data);
 	do { // folders
 		if (FILE_ATTRIBUTE_DIRECTORY&data.dwFileAttributes) {
 			if (data.cFileName[0] == '.') continue; // évite "." et ".."
-			//SetConsoleTextAttribute(hConsole, 12);
-			//wprintf(L"%s\"text\" : \"%s\", \"children\" : [", espacea, data.cFileName);
-			fwprintf_s(fp, L"%s\"text\" : \"%s\", \"children\" : [", espacea, data.cFileName);
-			wcscpy_s(espacea, L",{");
-			//wprintf(L"%s\\\n",  data.cFileName);
+			// remplace '{\"text\" : \"'  par /
+			// remplace '\", \"children\" : ['  par :
 			wcscpy_s(nom, dir);
 			wcscat_s(nom, L"\\");
 			wcscat_s(nom, data.cFileName);
@@ -85,14 +103,17 @@ void listdir(const wchar_t dir[], FILE * fp, std::set<std::wstring> &parts) {
 			// voir si nom est dans la liste des exclusions.
 			std::set<std::wstring>::iterator it = parts.find(nomwstring);
 			const bool is_in = (it != parts.end());
-			if (it != parts.end()) { 
+			if (it != parts.end()) {
 				// on supprime de la list des exclusions
-				parts.erase(it); 
+				parts.erase(it);
+				continue; // décomente si tu veux inclure les folder exclut mais vide.
 			}
-			//if (wcsncmp(nom, L"c:\\\\Windows\\\\", 8) != 0)
-			if (!is_in )
-				listdir(nom, fp, parts); // folder
-			//wprintf( L"]" );
+			//fwprintf_s(stdout, L"%s{\"text\" : \"%s\", \"children\" : [", espacea, data.cFileName);
+			fwprintf_s(fp, L"%s/%s:", espacea, data.cFileName);
+			wcscpy_s(espacea, L",");
+			if (!is_in)
+				listdir(nom, fp, parts); // folder listdir recurcif pas de deeps dans la fonction.
+			//fwprintf_s(stdout, L"]}");
 			fwprintf_s(fp, L"]}");
 		}
 	} while (FindNextFile(h, &data));
@@ -107,8 +128,6 @@ bool dirExists(_TCHAR* dirName_in)
 }
 int _tmain(int argc, _TCHAR* argv[])
 {
-	//std::vector<std::wstring> parts;
-	//std::vector< std::wstring >::iterator it;
 	std::set<std::wstring> parts;
 	std::set< std::wstring >::iterator it;
 	wchar_t temp[MAX_PATH];
@@ -116,7 +135,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	wchar_t dir[_MAX_DIR];
 	wchar_t file[_MAX_FNAME];
 	wchar_t ext[_MAX_EXT];
-	size_t driveNumberOfElements = _MAX_DRIVE, dirNumberOfElements= _MAX_DIR, nameNumberOfElements=_MAX_FNAME, extNumberOfElements= _MAX_PATH;
+	size_t driveNumberOfElements = _MAX_DRIVE, dirNumberOfElements = _MAX_DIR, nameNumberOfElements = _MAX_FNAME, extNumberOfElements = _MAX_PATH;
 	size_t ReturnValue;
 
 	char outfilename[MAX_PATH];
@@ -145,8 +164,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		int ret = wcstombs_s(&ReturnValue, buffer, MAX_PATH, argv[2], MAX_PATH);
 		strcpy_s(outfilename, MAX_PATH, buffer);
 	}
-	
-	//lit fichier init pour voir si il y a des exclusion str separe par des virgule.
+
+	//lit fichier init pour voir si il y a des exclusions str separe par des virgules.
 	GetPrivateProfileString(
 		_T("browserfile"),
 		_T("listexclude"),
@@ -154,29 +173,39 @@ int _tmain(int argc, _TCHAR* argv[])
 		(LPWSTR)temp,
 		sizeof(temp),
 		_T("C:\\Program Files\\Pulse\\etc\\agentconf.ini"));
-	
-	printf("\nfile result in %s\n", outfilename);
+
+
 	std::wstring stringdata(temp), tempstr;
 	std::wstringstream wss(temp);
-	while (std::getline(wss, tempstr, L','))//std::string& trim(std::string& str, const std::string& chars = "\t\n\v\f\r ")
-		//parts.push_back(wtrim_copy(tempstr)); // pour vector
+	while (std::getline(wss, tempstr, L','))
 		parts.insert(wtrim_copy(tempstr)); //pour set
-	//affiche vector des exclusion
-	for (it = parts.begin(); it != parts.end(); ++it)
-		std::wcout << *it << std::endl;
-	
-	// vector  part contient les exclusions.
 
-	printf("\file result in %s", outfilename);
+	//affiche path exclusion
+	display(parts, L"LIST EXCLUD PATH");
+
+	std::wcout << L"RESULT IN FILE : " << outfilename << std::endl;
 	errno_t err = fopen_s(&fp, (char*)outfilename, "w+");
-	_wsplitpath_s(argv[1], drive, driveNumberOfElements, dir, dirNumberOfElements, file, nameNumberOfElements, ext, extNumberOfElements);
-	fwprintf_s(fp, L"{\"text\" : \"%s\", \"children\" : [", file);
+
+	//decompose path
+	_wsplitpath_s(argv[1],
+		drive,
+		driveNumberOfElements,
+		dir,
+		dirNumberOfElements,
+		file,
+		nameNumberOfElements,
+		ext,
+		extNumberOfElements);
+
+
+	std::wcout << L"Root file system : " << argv[1] << std::endl;
+	// Name file comme depart
+	//fwprintf_s(stdout, L"{\"text\" : \"%s\", \"children\" : [", file);
+	fwprintf_s(fp, L"/%s:", file);
+
 	listdir(argv[1], fp, parts);
-	fprintf(fp, "]}");
+	//fwprintf_s(stdout, L"]}");
+	fwprintf_s(fp, L"]}");
 	fclose(fp);
-	//fwprintf(stderr, L"\n arg1 (%s)\n", file);
-
-	for (it = parts.begin(); it != parts.end(); ++it)
-		std::wcout << *it << std::endl;
-
+	display(parts, L"LIST EXCLUSION PATH NO USED : ");
 }
