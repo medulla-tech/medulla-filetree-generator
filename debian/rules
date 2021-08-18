@@ -1,0 +1,50 @@
+#!/usr/bin/make -f
+
+
+build:
+	mkdir -p var/lib/pulse2/clients/win
+	cp windows/bin/pulse-filetree-generator.exe var/lib/pulse2/clients/win
+	mkdir -p var/lib/pulse2/clients/lin
+	g++ -O3 -std=c++11 linux_macos/pulse-filetree-generator.cpp -o pulse-filetree-generator
+	mkdir -p var/lib/pulse2/clients/lin/deb/pulse-agent-linux/usr/sbin
+	cp pulse-filetree-generator var/lib/pulse2/clients/lin/deb/pulse-agent-linux/usr/sbin
+	chmod +x var/lib/pulse2/clients/lin/deb/pulse-agent-linux/usr/sbin/pulse-filetree-generator
+	mkdir -p var/lib/pulse2/clients/lin/rpm/package/SOURCES
+	cp pulse-filetree-generator var/lib/pulse2/clients/lin/rpm/package/SOURCES
+	chmod +x var/lib/pulse2/clients/lin/rpm/package/SOURCES/pulse-filetree-generator
+	mkdir -p var/lib/pulse2/clients/mac
+	mv pulse-filetree-generator var/lib/pulse2/clients/mac
+	chmod +x var/lib/pulse2/clients/mac/pulse-filetree-generator                                                                                  
+
+clean:
+	dh_testdir
+	dh_testroot
+	-$(MAKE) clean
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+binary-indep: build install
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install
+	dh_fixperms
+	dh_installchangelogs
+	dh_installdocs
+	dh_installinit
+	# Some postinstall tools are known to fails after being stripped
+	#dh_strip
+	dh_link
+	dh_compress
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

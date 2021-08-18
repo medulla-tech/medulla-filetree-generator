@@ -1,0 +1,3 @@
+var/lib/pulse2/clients/mac
+var/lib/pulse2/clients/win
+var/lib/pulse2/clients/lin
