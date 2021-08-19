@@ -33,7 +33,7 @@ setup(
 
     keywords='pulse-filetree-generator',
     name='pulse_filetree_generator',
-    version='0.0.1',
+    version='0.2',
     debian_distro='stretch',
     description='pulse-xmpp-agent',
     url='https://www.siveo.net/',
