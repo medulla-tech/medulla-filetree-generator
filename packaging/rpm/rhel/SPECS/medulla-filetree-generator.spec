@@ -1,4 +1,4 @@
-%define tarname		pulse-filetree-generator
+%define tarname		medulla-filetree-generator
 %define git                    SHA
 %define use_git         1
 %define branch integration
@@ -24,7 +24,19 @@ Pulse Filetree Generator is an utility that create a XML file with the
 computer files. 
 This allow to speed up Pulse filetransfert feature.
 
-%files 
+#--------------------------------------------------------------------
+
+%package -n     pulse-filetree-generator
+Summary:        Tools used to help debugging medulla
+Group:          System/Servers
+BuildArch:      noarch
+
+%description -n pulse-filetree-generator
+Pulse Filetree Generator is an utility that create a XML file with the
+computer files.
+This allow to speed up Pulse filetransfert feature.
+
+%files -n pulse-filetree-generator
 %_var/lib/pulse2/clients/lin/deb/pulse-agent-linux/usr/sbin/pulse-filetree-generator
 %_var/lib/pulse2/clients/lin/rpm/package/SOURCES/pulse-filetree-generator
 %_var/lib/pulse2/clients/mac/pulse-filetree-generator
