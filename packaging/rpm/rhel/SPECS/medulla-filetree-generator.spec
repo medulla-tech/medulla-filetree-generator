@@ -31,7 +31,7 @@ Summary:        Tools used to help debugging medulla
 Group:          System/Servers
 BuildArch:      noarch
 
-%description -n medulla-filetree-generator
+%description -n pulse-filetree-generator
 Medulla Filetree Generator is an utility that create a XML file with the
 computer files.
 This allow to speed up Medulla filetransfert feature.
