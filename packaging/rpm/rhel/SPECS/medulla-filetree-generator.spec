@@ -29,7 +29,6 @@ This allow to speed up Pulse filetransfert feature.
 %package -n     pulse-filetree-generator
 Summary:        Tools used to help debugging medulla
 Group:          System/Servers
-BuildArch:      noarch
 
 %description -n pulse-filetree-generator
 Medulla Filetree Generator is an utility that create a XML file with the
