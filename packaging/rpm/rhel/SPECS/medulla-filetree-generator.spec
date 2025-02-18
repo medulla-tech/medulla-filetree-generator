@@ -43,7 +43,7 @@ This allow to speed up Medulla filetransfert feature.
 %_var/lib/pulse2/clients/win/pulse-filetree-generator.exe
 
 %prep
-%setup -q
+%setup -q -n %name
 
 %build
 # Nothing to do
