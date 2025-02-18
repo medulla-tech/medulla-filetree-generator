@@ -13,7 +13,7 @@ Release:        1%{?dist}
 Release:        0.%git.1%{?dist}
 %endif
 
-Source0:        %name-%version.tar.gz
+Source0:        %name-%version.tar.bz2
 License:	MIT
 
 Group:		Development/Python
