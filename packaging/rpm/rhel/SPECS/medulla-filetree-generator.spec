@@ -1,3 +1,5 @@
+%define debug_package %{nil}
+
 %define tarname		medulla-filetree-generator
 %define git                    SHA
 %define use_git         1
@@ -13,7 +15,9 @@ Release:        1%{?dist}
 Release:        0.%git.1%{?dist}
 %endif
 
-Source0:        %name-%version.tar.gz
+BuildRequires:  gcc-c++
+
+Source0:        %name-%version.tar.bz2
 License:	MIT
 
 Group:		Development/Python
@@ -29,7 +33,6 @@ This allow to speed up Pulse filetransfert feature.
 %package -n     pulse-filetree-generator
 Summary:        Tools used to help debugging medulla
 Group:          System/Servers
-BuildArch:      noarch
 
 %description -n pulse-filetree-generator
 Medulla Filetree Generator is an utility that create a XML file with the
@@ -43,7 +46,7 @@ This allow to speed up Medulla filetransfert feature.
 %_var/lib/pulse2/clients/win/pulse-filetree-generator.exe
 
 %prep
-%setup -q
+%setup -q -n %name
 
 %build
 # Nothing to do
