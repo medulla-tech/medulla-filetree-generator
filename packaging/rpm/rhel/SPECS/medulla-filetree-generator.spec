@@ -13,6 +13,8 @@ Release:        1%{?dist}
 Release:        0.%git.1%{?dist}
 %endif
 
+BuildRequires:  gcc-c++
+
 Source0:        %name-%version.tar.bz2
 License:	MIT
 
