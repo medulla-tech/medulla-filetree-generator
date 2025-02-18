@@ -1,3 +1,5 @@
+%define debug_package %{nil}
+
 %define tarname		medulla-filetree-generator
 %define git                    SHA
 %define use_git         1
